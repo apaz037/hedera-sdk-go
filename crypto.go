@@ -6,6 +6,7 @@ import (
 	"crypto/sha512"
 	"encoding/binary"
 	"encoding/hex"
+	"encoding/pem"
 	"fmt"
 	"golang.org/x/crypto/ed25519"
 	"golang.org/x/crypto/pbkdf2"
@@ -164,6 +165,19 @@ func Ed25519PrivateKeyReadKeystore(source io.Reader, passphrase string) (Ed25519
 	}
 
 	return Ed25519PrivateKeyFromKeystore(keystoreBytes, passphrase)
+}
+
+func Ed25519PrivateKeyFromPem(pemBytes []byte, passphrase string) (Ed25519PrivateKey, error) {
+	var keyBytes []byte
+
+	for block, _ := pem.Decode(pemBytes); block != nil; {
+		if block.Type == "PRIVATE KEY" {
+			keyBytes = block.Bytes
+			break
+		}
+	}
+
+	return Ed25519PrivateKeyFromBytes(keyBytes)
 }
 
 func Ed25519PublicKeyFromString(s string) (Ed25519PublicKey, error) {
